@@ -5,6 +5,7 @@ public class Account {
     private String kahao;
     private String tel;
     private String sex;
+    private double balance;
     Account(String username,String password,String ID,String kahao,String tel,String sex){
         this.username=username;
         this.password=password;
@@ -12,6 +13,11 @@ public class Account {
         this.kahao=kahao;
         this.tel = tel;
         this.sex = sex;
+        this.balance=0;//余额默认为0
+    }
+    Account(String tel,String password){
+        this.password=password;
+        this.tel=tel;
     }
     Account(){}
     public String getPassword() {
@@ -60,5 +66,13 @@ public class Account {
 
     public void setSex(String sex) {
         this.sex = sex;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void setBalance(double balance) {
+        this.balance = balance;
     }
 }

@@ -1,11 +1,17 @@
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import unit.DBunit;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.System.out;
 
 public class AccountDaoImpl implements AccountDao {
 
@@ -22,7 +28,7 @@ public class AccountDaoImpl implements AccountDao {
             /*用知insert语句：　INSERT INTO table1(id, name, address) VALUES(1, ygl, 'beijing')，该语句主要适用于sql和PL/SQL。*/
             //用户输入来的内容未知，所以用占位符‘?’
             //values中的内容皆被视作为字符串，因此这个时候在里面写入的方法只具有展示性，不具有功能性
-            String sql="insert into user(username, passward,ID,kahao,tel,sex)values(?,?,?,?,?,?)";
+            String sql="insert into user(username,password,ID,kahao,tel,sex,balance)values(?,?,?,?,?,?,?)";
 		    /*（作用是将将sql指令发送给mysql执行）*/
 
             PreparedStatement pst=conn.prepareStatement(sql);
@@ -34,14 +40,15 @@ public class AccountDaoImpl implements AccountDao {
             pst.setString(4,account.getKahao());
             pst.setString(5,account.getTel());
             pst.setString(6,account.getSex());
+            pst.setDouble(7,account.getBalance());
             //增删改：executeupdate()
             //查：executequery()
             int num=pst.executeUpdate();
             if(num>0){
-                System.out.println("注册成功!!!");
+                out.println("注册成功!!!");
             }
             else{
-                System.out.println("注册失败...");
+                out.println("注册失败...");
 
             }
 
@@ -60,10 +67,39 @@ public class AccountDaoImpl implements AccountDao {
     }
 
     @Override
-    public void del(String name) {
+    public void login(Account account,HttpServletRequest request, HttpServletResponse response) throws SQLException {
+        try {
+            Connection conn = DBunit.getConnection();
+            PreparedStatement pst = conn.prepareStatement("select * from user where tel=? and password=?");
+            pst.setString(1, account.getTel());
+            pst.setString(2, account.getPassword());
+            //执行sql语句
+            ResultSet rs = pst.executeQuery();
+            //处理结果
+            if (rs.next()) {
+                //转发
+                request.getRequestDispatcher("connection.jsp").forward(request, response);
+            } else {
+                //失败
+                 request.setAttribute("errorMessage","电话号码或者密码错误，请重新登录！");
+                 request.getRequestDispatcher("login.jsp").forward(request,response);
+            }
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } catch (ServletException | IOException e) {
+            throw new RuntimeException(e);
+        } finally{
 
+            try {
+                DBunit.release();
+            } catch (Exception e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+        }
     }
-
     @Override
     public void update(Account account) {
 
@@ -87,6 +123,7 @@ public class AccountDaoImpl implements AccountDao {
                 account.setKahao(rs.getString("kahao"));
                 account.setTel(rs.getString("tel"));
                 account.setSex(rs.getString("sex"));
+                account.setBalance(rs.getDouble("balance"));
                 //对象添加到集合中
                 accounts.add(account);
 

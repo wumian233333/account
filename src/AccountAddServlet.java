@@ -20,7 +20,7 @@ public class AccountAddServlet extends HttpServlet {
         Account account = new Account(userName,passWord,ID,kahao,Tel,Sex);
         AccountDaoImpl accountDao = new AccountDaoImpl();
         accountDao.add(account);
-        //response.sendRedirect("index.jsp");
+        response.sendRedirect("login.jsp");
     }
 
     @Override
